@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: job-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: job-service
+  template:
+    metadata:
+      labels:
+        app: job-service
+    spec:
+      containers:
+        - name: job-service
+          image: maxwellc21/lokaljob-job-service:latest
+          ports:
+            - containerPort: 5002
+          env:
+            - name: MONGO_URI
+              value: "mongodb://mongo:27017/jobsdb"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: job-service
+spec:
+  selector:
+    app: job-service
+  ports:
+    - port: 5002
+      targetPort: 5002

@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gateway-service
+  template:
+    metadata:
+      labels:
+        app: gateway-service
+    spec:
+      containers:
+        - name: gateway-service
+          image: maxwellc21/lokaljob-gateway-service:latest
+          ports:
+            - containerPort: 8000
+          env:
+            - name: AUTH_SERVICE_URL
+              value: "http://auth-service:5000"
+            - name: USER_SERVICE_URL
+              value: "http://user-service:5001"
+            - name: JOB_SERVICE_URL
+              value: "http://job-service:5002"
+            - name: APPLICATION_SERVICE_URL
+              value: "http://application-service:5003"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway-service
+spec:
+  selector:
+    app: gateway-service
+  ports:
+    - port: 8000
+      targetPort: 8000
+  type: NodePort

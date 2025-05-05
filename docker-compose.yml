@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo
+    container_name: lokaljob-mongo
+    ports:
+      - "27017:27017"
+
+  auth-service:
+    build: ./auth-service
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/authdb
+      - JWT_SECRET=your_jwt_secret_key
+    depends_on:
+      - mongo
+
+  user-service:
+    build: ./user-service
+    ports:
+      - "5001:5001"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/usersdb
+    depends_on:
+      - mongo
+
+  job-service:
+    build: ./job-service
+    ports:
+      - "5002:5002"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/jobsdb
+    depends_on:
+      - mongo
+
+  application-service:
+    build: ./application-service
+    ports:
+      - "5003:5003"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/applicationsdb
+    depends_on:
+      - mongo
+
+  gateway-service:
+    build: ./gateway-service
+    ports:
+      - "8000:8000"
+    environment:
+      - AUTH_SERVICE_URL=http://auth-service:5000
+      - USER_SERVICE_URL=http://user-service:5001
+      - JOB_SERVICE_URL=http://job-service:5002
+      - APPLICATION_SERVICE_URL=http://application-service:5003
+    depends_on:
+      - auth-service
+      - user-service
+      - job-service
+      - application-service
